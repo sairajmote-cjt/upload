@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Images</title>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Upload Images</h1>
+        <form id="upload-form">
+            <input type="file" accept="image/*" multiple>
+            <button type="button" id="upload-button">Upload</button>
+        </form>
+    </div>
+    <script>
+        async function sendProductImages(productImages) {
+            const apiUrl = 'http://localhost:3000/upload-product-images';
+
+            const formData = new FormData();
+
+            productImages.forEach(({ id, name, image }) => {
+                formData.append('images', image, `${id}-${name}`);
+            });
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Success:', data);
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        document.getElementById('upload-button').addEventListener('click', async () => {
+            const files = document.querySelector('input[type="file"]').files;
+            const productImages = [];
+            const id = Math.random().toString(36).substring(2);
+            [...files].forEach(file => {
+                productImages.push({
+                    id,
+                    name: file.name,
+                    image: file,
+                });
+            });
+
+            try {
+                await sendProductImages(productImages);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>
